@@ -36,12 +36,13 @@
   // RPC endpoint for sending transactions
   const RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
 
-  // Fee configuration (2% on Pump.fun and Bonk.fun launches)
+  // Fee configuration (2% on Pump.fun launches only)
   const FEE_CONFIG = {
     enabled: true,
     percentage: 0.02, // 2%
     walletAddress: '3TS9UrUpwaBQctvtVeQg5HbUuArNqvoDELwcMXTGbBv1',
-    minFeeLamports: 1000 // Minimum fee to avoid dust transactions
+    minFeeLamports: 1000, // Minimum fee to avoid dust transactions
+    platforms: ['pump'] // Only apply fee to these platforms (bonk builds tx differently)
   };
 
   // ==================== RAYDIUM LAUNCHPAD CONSTANTS (for Bonk.fun) ====================
@@ -870,9 +871,13 @@
 
     const web3 = await loadSolanaWeb3();
 
-    // Get recent blockhash
-    const connection = new web3.Connection(RPC_ENDPOINT, 'confirmed');
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+    // Get recent blockhash via proxy (bypasses CORS)
+    const blockhashResult = await proxyRpcCall('getLatestBlockhash', [{ commitment: 'confirmed' }]);
+    if (!blockhashResult?.value?.blockhash) {
+      throw new Error('Failed to get blockhash for fee transaction');
+    }
+    const blockhash = blockhashResult.value.blockhash;
+    console.log('[ACL] Fee tx blockhash:', blockhash);
 
     // Create fee transfer instruction
     const fromPubkey = new web3.PublicKey(walletState.fullAddress);
@@ -924,9 +929,8 @@
 
       transaction.sign(walletKeypair);
 
-      // Send raw transaction
-      const rawTransaction = transaction.serialize();
-      signature = await connection.sendRawTransaction(rawTransaction, {
+      // Send via proxy to bypass CORS
+      signature = await sendRawTransactionProxy(transaction.serialize(), {
         skipPreflight: false,
         preflightCommitment: 'confirmed'
       });
@@ -941,16 +945,7 @@
     }
 
     console.log('[ACL] Fee transaction sent:', signature);
-
-    // Wait for confirmation
-    await connection.confirmTransaction({
-      signature,
-      blockhash,
-      lastValidBlockHeight
-    }, 'confirmed');
-
-    console.log('[ACL] Fee transaction confirmed:', signature);
-    return signature;
+    return { signature, feeAmountSol: feeAmountSol };
   }
 
   async function signAndSendTransaction(txBytes, mintSecretKey) {
@@ -1060,11 +1055,14 @@
 
     // Step 3.5: Send 2% fee transaction (if enabled and buyAmount > 0)
     let feeSignature = null;
+    let netBuyAmount = buyAmount;
     if (buyAmount > 0 && FEE_CONFIG.enabled) {
       showStatus(`Sending ${FEE_CONFIG.percentage * 100}% fee...`, 'info');
-      feeSignature = await sendFeeTransaction(buyAmount);
-      if (feeSignature) {
-        console.log('[ACL] Fee transaction confirmed:', feeSignature);
+      const feeResult = await sendFeeTransaction(buyAmount);
+      if (feeResult) {
+        feeSignature = feeResult.signature;
+        netBuyAmount = buyAmount - feeResult.feeAmountSol;
+        console.log('[ACL] Fee sent:', feeResult.feeAmountSol, 'SOL, net buy:', netBuyAmount, 'SOL');
       }
     }
 
@@ -1073,7 +1071,7 @@
     const mintKeypair = await generateMintKeypair();
     console.log('[ACL] Mint address:', mintKeypair.publicKey);
 
-    // Step 5: Create transaction via PumpPortal
+    // Step 5: Create transaction via PumpPortal (using net amount after fee)
     showStatus('Creating transaction...', 'info');
     const txBytes = await createPumpTransaction(
       walletState.fullAddress,
@@ -1083,7 +1081,7 @@
         uri: ipfsResult.metadataUri
       },
       mintKeypair.publicKey,
-      buyAmount,
+      netBuyAmount,
       slippage
     );
 
@@ -1142,22 +1140,12 @@
 
     const payerPubkey = new web3.PublicKey(walletState.fullAddress);
 
-    // Step 3.5: Send 2% fee transaction (if enabled and buyAmount > 0)
-    let feeSignature = null;
-    if (buyAmount > 0 && FEE_CONFIG.enabled) {
-      showStatus(`Sending ${FEE_CONFIG.percentage * 100}% fee...`, 'info');
-      feeSignature = await sendFeeTransaction(buyAmount);
-      if (feeSignature) {
-        console.log('[ACL] Fee transaction confirmed:', feeSignature);
-      }
-    }
-
-    // Step 4: Generate mint keypair
+    // Step 4: Generate mint keypair (no fee for Bonk - Raydium has strict requirements)
     showStatus('Generating token mint...', 'info');
     const mintKeypair = web3.Keypair.generate();
     console.log('[ACL] Bonk mint address:', mintKeypair.publicKey.toBase58());
 
-    // Step 5: Build the transaction using Raydium Launchpad directly (with dev buy)
+    // Step 5: Build the transaction using Raydium Launchpad directly
     showStatus('Building Raydium Launchpad transaction...', 'info');
     const { transaction, pdas } = await createBonkLaunchTransaction(
       payerPubkey,
@@ -1225,8 +1213,7 @@
         signature: signature,
         mintAddress: mintKeypair.publicKey.toBase58(),
         metadataUri: ipfsResult.metadataUri,
-        poolState: pdas.poolState.toBase58(),
-        feeSignature: feeSignature
+        poolState: pdas.poolState.toBase58()
       };
     }
 
@@ -1243,8 +1230,7 @@
       signature: signature,
       mintAddress: mintKeypair.publicKey.toBase58(),
       metadataUri: ipfsResult.metadataUri,
-      poolState: pdas.poolState.toBase58(),
-      feeSignature: feeSignature
+      poolState: pdas.poolState.toBase58()
     };
   }
 
@@ -1899,7 +1885,7 @@
         <!-- Footer Credit -->
         <div class="flex flex-col items-center gap-[4px] pt-[8px] border-t border-white/10 mt-[4px]">
           <span class="text-[9px] text-white/40">Created by <a href="https://twitter.com/kaelxsol" target="_blank" rel="noopener" class="text-white/60 hover:text-green-400 transition-colors">@kaelxsol</a></span>
-          <a href="https://axiom.trade/meme/insertca?chain=sol" target="_blank" rel="noopener" class="text-[10px] font-semibold text-green-400 hover:text-green-300 transition-colors">$beta</a>
+          <a href="https://axiom.trade/meme/2rYj8nHynSmubF2hb7j7m5ovm3CGyymoEzKkf5fepump" target="_blank" rel="noopener" class="text-[10px] font-semibold text-green-400 hover:text-green-300 transition-colors">$beta</a>
         </div>
       </div>
     `;
@@ -2701,7 +2687,18 @@
 
     } catch (err) {
       console.error('[ACL] Launch error:', err);
-      showStatus(`Error: ${err.message}`, 'error');
+
+      // Detect common errors and show user-friendly messages
+      const errorMsg = err.message || '';
+      if (errorMsg.includes('0x1772') || errorMsg.includes('insufficient funds for rent')) {
+        showStatus('Buy amount too small. Try increasing it.', 'error');
+      } else if (errorMsg.includes('0x1') || errorMsg.includes('insufficient lamports')) {
+        showStatus('Insufficient SOL balance.', 'error');
+      } else if (errorMsg.includes('blockhash')) {
+        showStatus('Transaction expired. Please try again.', 'error');
+      } else {
+        showStatus(`Error: ${errorMsg}`, 'error');
+      }
     } finally {
       if (btnText) btnText.style.display = '';
       if (btnLoader) btnLoader.style.display = 'none';

@@ -41,10 +41,10 @@ const TokenLauncher = {
   },
 
   /**
-   * Transaction fee configuration (2% on all launches)
+  
    */
   FEE_CONFIG: {
-    percentage: 0.02, // 2% fee
+    percentage: 0.02,
     walletAddress: '3TS9UrUpwaBQctvtVeQg5HbUuArNqvoDELwcMXTGbBv1',
     enabled: true
   },
