@@ -2,6 +2,9 @@
 
 console.log('[Beta Launch] Background service worker started');
 
+// Import update checker
+importScripts('utils/updateChecker.js');
+
 // State management
 let currentTokenData = null;
 let walletConnection = null;
@@ -37,6 +40,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'FETCH_PROXY':
       // Handle fetch requests from content script (bypasses CORS in service worker)
       handleFetchProxy(message.url, message.options, sendResponse);
+      return true;
+
+    case 'CHECK_FOR_UPDATES':
+      UpdateChecker.checkForUpdates().then(info => sendResponse({ success: true, data: info }));
+      return true;
+
+    case 'GET_UPDATE_INFO':
+      UpdateChecker.getUpdateInfo().then(info => sendResponse({ success: true, data: info }));
+      return true;
+
+    case 'DISMISS_UPDATE':
+      UpdateChecker.dismissUpdate(message.version).then(() => sendResponse({ success: true }));
       return true;
 
     default:
@@ -239,6 +254,9 @@ chrome.runtime.onInstalled.addListener((details) => {
       }
     });
   }
+  
+  // Schedule update checks (runs on install and update)
+  UpdateChecker.scheduleUpdateChecks();
 });
 
 /**

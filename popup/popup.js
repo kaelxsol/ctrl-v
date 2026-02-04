@@ -70,6 +70,48 @@
     
     // Show appropriate view
     updateView();
+    
+    // Check for updates
+    await checkForUpdates();
+  }
+
+  /**
+   * Check for updates and show banner if available
+   */
+  async function checkForUpdates() {
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'GET_UPDATE_INFO' });
+      if (response?.success && response.data?.updateAvailable) {
+        showUpdateBanner(response.data);
+      }
+    } catch (error) {
+      console.log('[Popup] Update check error:', error);
+    }
+  }
+
+  /**
+   * Show update banner with version info
+   */
+  function showUpdateBanner(updateInfo) {
+    const banner = document.getElementById('update-banner');
+    const versionSpan = document.getElementById('update-version');
+    const downloadBtn = document.getElementById('update-download');
+    const dismissBtn = document.getElementById('update-dismiss');
+    
+    if (banner && updateInfo) {
+      versionSpan.textContent = `v${updateInfo.latestVersion} available`;
+      downloadBtn.href = updateInfo.downloadUrl || updateInfo.releaseUrl;
+      banner.classList.remove('hidden');
+      
+      // Dismiss handler
+      dismissBtn.addEventListener('click', async () => {
+        await chrome.runtime.sendMessage({ 
+          type: 'DISMISS_UPDATE', 
+          version: updateInfo.latestVersion 
+        });
+        banner.classList.add('hidden');
+      });
+    }
   }
 
   /**

@@ -17,6 +17,21 @@
       <span class="version">v0.1.0</span>
     </header>
 
+    <!-- Update Banner (hidden by default) -->
+    <div id="update-banner" class="update-banner hidden">
+      <div class="update-content">
+        <span class="update-icon">🚀</span>
+        <div class="update-text">
+          <span class="update-title">Update Available!</span>
+          <span class="update-version" id="update-version">v0.0.0</span>
+        </div>
+      </div>
+      <div class="update-actions">
+        <a id="update-download" href="#" target="_blank" rel="noopener" class="btn btn-update">Download</a>
+        <button id="update-dismiss" class="btn-dismiss" title="Dismiss">✕</button>
+      </div>
+    </div>
+
     <!-- Setup Steps Indicator -->
     <div id="setup-progress" class="setup-progress">
       <div class="step active" data-step="1">

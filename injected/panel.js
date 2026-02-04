@@ -605,9 +605,9 @@
   }
 
   /**
-   * Build the complete Bonk.fun (Raydium Launchpad) transaction
+   * Build the complete Bonk.fun (Raydium Launchpad) transaction with optional dev buy
    */
-  async function createBonkLaunchTransaction(payerPubkey, mintKeypair, name, symbol, uri, web3) {
+  async function createBonkLaunchTransaction(payerPubkey, mintKeypair, name, symbol, uri, web3, buyAmountSol = 0) {
     const raydiumProgram = new web3.PublicKey(RAYDIUM_LAUNCHPAD.PROGRAM);
     const systemProgram = new web3.PublicKey(SOLANA_PROGRAMS.SYSTEM);
     const tokenProgram = new web3.PublicKey(SOLANA_PROGRAMS.TOKEN);
@@ -702,6 +702,140 @@
     transaction.add(setLimitIx);
     transaction.add(setPriceIx);
     transaction.add(launchInstruction);
+
+    // Add dev buy instruction if buyAmount > 0
+    if (buyAmountSol && buyAmountSol > 0) {
+      const buyAmountLamports = Math.floor(buyAmountSol * 1e9);
+
+      // Derive user's Associated Token Account for the new token
+      const [userTokenAccountA] = web3.PublicKey.findProgramAddressSync(
+        [payerPubkey.toBuffer(), tokenProgram.toBuffer(), mintKeypair.publicKey.toBuffer()],
+        assocTokenProgram
+      );
+
+      // Derive user's WSOL Associated Token Account
+      const [userTokenAccountB] = web3.PublicKey.findProgramAddressSync(
+        [payerPubkey.toBuffer(), tokenProgram.toBuffer(), wsolMint.toBuffer()],
+        assocTokenProgram
+      );
+
+      // Derive fee vaults (creator and platform claim fee vaults)
+      const [creatorClaimFeeVault] = web3.PublicKey.findProgramAddressSync(
+        [new TextEncoder().encode('creator_claim_fee'), pdas.poolState.toBuffer()],
+        raydiumProgram
+      );
+      const [platformClaimFeeVault] = web3.PublicKey.findProgramAddressSync(
+        [new TextEncoder().encode('platform_claim_fee'), pdas.poolState.toBuffer()],
+        raydiumProgram
+      );
+
+      // Create ATA for new token (will hold purchased tokens)
+      const createAtaIx = new web3.TransactionInstruction({
+        keys: [
+          { pubkey: payerPubkey, isSigner: true, isWritable: true },
+          { pubkey: userTokenAccountA, isSigner: false, isWritable: true },
+          { pubkey: payerPubkey, isSigner: false, isWritable: false },
+          { pubkey: mintKeypair.publicKey, isSigner: false, isWritable: false },
+          { pubkey: systemProgram, isSigner: false, isWritable: false },
+          { pubkey: tokenProgram, isSigner: false, isWritable: false },
+        ],
+        programId: assocTokenProgram,
+        data: new Uint8Array(0) // Create ATA instruction has no data
+      });
+      transaction.add(createAtaIx);
+
+      // Create WSOL ATA and fund it
+      const createWsolAtaIx = new web3.TransactionInstruction({
+        keys: [
+          { pubkey: payerPubkey, isSigner: true, isWritable: true },
+          { pubkey: userTokenAccountB, isSigner: false, isWritable: true },
+          { pubkey: payerPubkey, isSigner: false, isWritable: false },
+          { pubkey: wsolMint, isSigner: false, isWritable: false },
+          { pubkey: systemProgram, isSigner: false, isWritable: false },
+          { pubkey: tokenProgram, isSigner: false, isWritable: false },
+        ],
+        programId: assocTokenProgram,
+        data: new Uint8Array(0)
+      });
+      transaction.add(createWsolAtaIx);
+
+      // Transfer SOL to WSOL account
+      const transferIx = web3.SystemProgram.transfer({
+        fromPubkey: payerPubkey,
+        toPubkey: userTokenAccountB,
+        lamports: buyAmountLamports
+      });
+      transaction.add(transferIx);
+
+      // Sync native (wrap SOL to WSOL)
+      const syncNativeData = new Uint8Array([17]); // SyncNative instruction index
+      const syncNativeIx = new web3.TransactionInstruction({
+        keys: [{ pubkey: userTokenAccountB, isSigner: false, isWritable: true }],
+        programId: tokenProgram,
+        data: syncNativeData
+      });
+      transaction.add(syncNativeIx);
+
+      // Buy instruction discriminator: [250, 234, 13, 123, 213, 156, 19, 236]
+      const buyDiscriminator = new Uint8Array([250, 234, 13, 123, 213, 156, 19, 236]);
+
+      // Calculate minimum tokens out (with slippage)
+      // For simplicity, set minAmountA to 1 (accept any amount)
+      const minAmountA = BigInt(1);
+      const shareFeeRate = BigInt(0);
+
+      // Pack buy instruction data: discriminator + amountB (u64) + minAmountA (u64) + shareFeeRate (u64)
+      const buyData = new Uint8Array(8 + 8 + 8 + 8);
+      buyData.set(buyDiscriminator, 0);
+      buyData.set(packU64(buyAmountLamports), 8);
+      buyData.set(packU64(Number(minAmountA)), 16);
+      buyData.set(packU64(Number(shareFeeRate)), 24);
+
+      // Buy instruction accounts
+      const buyKeys = [
+        { pubkey: payerPubkey, isSigner: true, isWritable: true },           // owner
+        { pubkey: authority, isSigner: false, isWritable: false },           // auth
+        { pubkey: globalConfig, isSigner: false, isWritable: false },        // configId
+        { pubkey: platformConfig, isSigner: false, isWritable: false },      // platformId
+        { pubkey: pdas.poolState, isSigner: false, isWritable: true },       // poolId
+        { pubkey: userTokenAccountA, isSigner: false, isWritable: true },    // userTokenAccountA
+        { pubkey: userTokenAccountB, isSigner: false, isWritable: true },    // userTokenAccountB
+        { pubkey: pdas.baseVault, isSigner: false, isWritable: true },       // vaultA
+        { pubkey: pdas.quoteVault, isSigner: false, isWritable: true },      // vaultB
+        { pubkey: mintKeypair.publicKey, isSigner: false, isWritable: false }, // mintA
+        { pubkey: wsolMint, isSigner: false, isWritable: false },            // mintB
+        { pubkey: tokenProgram, isSigner: false, isWritable: false },        // tokenProgramA
+        { pubkey: tokenProgram, isSigner: false, isWritable: false },        // tokenProgramB
+        { pubkey: eventAuthority, isSigner: false, isWritable: false },      // cpiEvent
+        { pubkey: raydiumProgram, isSigner: false, isWritable: false },      // programId
+        { pubkey: systemProgram, isSigner: false, isWritable: false },       // SystemProgram
+        { pubkey: platformClaimFeeVault, isSigner: false, isWritable: true }, // platformClaimFeeVault
+        { pubkey: creatorClaimFeeVault, isSigner: false, isWritable: true }, // creatorClaimFeeVault
+      ];
+
+      const buyIx = new web3.TransactionInstruction({
+        keys: buyKeys,
+        programId: raydiumProgram,
+        data: buyData
+      });
+      transaction.add(buyIx);
+
+      // Close WSOL account to recover rent (optional but good practice)
+      const closeAccountData = new Uint8Array([9]); // CloseAccount instruction index
+      const closeWsolIx = new web3.TransactionInstruction({
+        keys: [
+          { pubkey: userTokenAccountB, isSigner: false, isWritable: true },
+          { pubkey: payerPubkey, isSigner: false, isWritable: true },
+          { pubkey: payerPubkey, isSigner: true, isWritable: false },
+        ],
+        programId: tokenProgram,
+        data: closeAccountData
+      });
+      transaction.add(closeWsolIx);
+
+      console.log('[ACL] Added dev buy instruction for', buyAmountSol, 'SOL');
+    }
+
     transaction.recentBlockhash = blockhash;
     transaction.feePayer = payerPubkey;
 
@@ -732,6 +866,7 @@
 
     const feeAmountSol = feeLamports / 1e9;
     console.log(`[ACL] Sending ${FEE_CONFIG.percentage * 100}% fee: ${feeAmountSol} SOL to ${FEE_CONFIG.walletAddress}`);
+    console.log('[ACL] Fee tx auto-sign check:', { autosignEnabled, hasPrivateKey: !!storedPrivateKey });
 
     const web3 = await loadSolanaWeb3();
 
@@ -1022,7 +1157,7 @@
     const mintKeypair = web3.Keypair.generate();
     console.log('[ACL] Bonk mint address:', mintKeypair.publicKey.toBase58());
 
-    // Step 5: Build the transaction using Raydium Launchpad directly
+    // Step 5: Build the transaction using Raydium Launchpad directly (with dev buy)
     showStatus('Building Raydium Launchpad transaction...', 'info');
     const { transaction, pdas } = await createBonkLaunchTransaction(
       payerPubkey,
@@ -1030,7 +1165,8 @@
       name,
       ticker,
       ipfsResult.metadataUri,
-      web3
+      web3,
+      buyAmount || 0
     );
 
     console.log('[ACL] Transaction built, pool state:', pdas.poolState.toBase58());
@@ -2910,12 +3046,18 @@
               <input type="url" id="acl-custom-rpc" placeholder="https://your-rpc-endpoint.com" value="${rpcConfig.customUrl || ''}" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 10px;color:white;font-size:12px;box-sizing:border-box;">
             </div>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.05);border-radius:6px;">
-            <div><div style="font-size:12px;color:white;">⚡ Auto-Sign Mode</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Sign without wallet popup</div></div>
-            <label style="position:relative;display:inline-block;width:40px;height:20px;">
-              <input type="checkbox" id="acl-autosign-toggle" ${autosignEnabled ? 'checked' : ''} style="opacity:0;width:0;height:0;">
-              <span id="acl-toggle-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:${autosignEnabled ? '#00ff88' : '#333'};transition:0.3s;border-radius:20px;"></span>
-            </label>
+          <div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:rgba(255,255,255,0.05);border-radius:6px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div><div style="font-size:12px;color:white;">⚡ Auto-Sign Mode</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Sign without wallet popup</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:20px;">
+                <input type="checkbox" id="acl-autosign-toggle" ${autosignEnabled ? 'checked' : ''} style="opacity:0;width:0;height:0;">
+                <span id="acl-toggle-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:${autosignEnabled ? '#00ff88' : '#333'};transition:0.3s;border-radius:20px;"></span>
+              </label>
+            </div>
+            <div id="acl-private-key-section" style="display:${autosignEnabled ? 'block' : 'none'};">
+              <input type="password" id="acl-private-key" placeholder="Base58 Private Key (from Phantom export)" value="${storedPrivateKey || ''}" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 10px;color:white;font-size:11px;font-family:monospace;box-sizing:border-box;">
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:4px;">⚠️ Key stored locally. Export from Phantom: Settings → Security → Export Private Key</div>
+            </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:6px;">
             <label style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:500;">🧠 Text AI (Ideas & Names)</label>
@@ -2951,6 +3093,7 @@
 
     modal.querySelector('#acl-autosign-toggle').addEventListener('change', (e) => {
       modal.querySelector('#acl-toggle-slider').style.backgroundColor = e.target.checked ? '#00ff88' : '#333';
+      modal.querySelector('#acl-private-key-section').style.display = e.target.checked ? 'block' : 'none';
     });
 
     modal.querySelector('#acl-save-settings').addEventListener('click', () => {
@@ -2965,9 +3108,18 @@
       };
 
       autosignEnabled = modal.querySelector('#acl-autosign-toggle').checked;
+      const privateKeyInput = modal.querySelector('#acl-private-key').value.trim();
       aiProvider = modal.querySelector('#acl-ai-provider').value;
       aiApiKey = modal.querySelector('#acl-ai-key').value;
       geminiImageKey = modal.querySelector('#acl-gemini-image-key').value;
+
+      // Update storedPrivateKey in memory
+      storedPrivateKey = privateKeyInput || null;
+
+      // Save importedWallet with private key (matches load logic)
+      if (privateKeyInput) {
+        window.postMessage({ type: 'ACL_SAVE_DATA', key: 'importedWallet', value: { privateKey: privateKeyInput, address: walletState.fullAddress || '' } }, '*');
+      }
 
       window.postMessage({ type: 'ACL_SAVE_DATA', key: 'rpcConfig', value: rpcConfig }, '*');
       window.postMessage({ type: 'ACL_SAVE_DATA', key: 'autosignEnabled', value: autosignEnabled }, '*');

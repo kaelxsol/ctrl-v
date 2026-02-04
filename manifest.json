@@ -6,7 +6,8 @@
   "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "alarms"
   ],
   "host_permissions": [
     "https://axiom.trade/*",
@@ -17,7 +18,8 @@
     "https://api.anthropic.com/*",
     "https://public-api-v2.bags.fm/*",
     "https://bags.fm/*",
-    "https://gated.chat/*"
+    "https://gated.chat/*",
+    "https://api.github.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",

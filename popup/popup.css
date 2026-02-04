@@ -651,3 +651,101 @@ body {
   font-size: 10px;
   color: var(--text-muted);
 }
+
+/* Update Banner */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #1a3d2a 0%, #0d2818 100%);
+  border: 1px solid var(--accent-green);
+  border-radius: 10px;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+  }
+}
+
+.update-banner.hidden {
+  display: none;
+}
+
+.update-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.update-icon {
+  font-size: 18px;
+}
+
+.update-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.update-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+.update-version {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.update-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-update {
+  padding: 6px 12px;
+  font-size: 11px;
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-update:hover {
+  background: var(--accent-green-dim);
+  transform: translateY(-1px);
+}
+
+.btn-dismiss {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-dismiss:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-color: var(--text-muted);
+}
