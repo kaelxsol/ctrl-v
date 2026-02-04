@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beta Launch Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <img src="../icons/icon128.png" alt="" class="header-icon">
+        <h1>Beta Launch</h1>
+      </div>
+      <span class="version">v0.1.0</span>
+    </header>
+
+    <!-- Setup Steps Indicator -->
+    <div id="setup-progress" class="setup-progress">
+      <div class="step active" data-step="1">
+        <span class="step-num">1</span>
+        <span class="step-label">RPC</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2">
+        <span class="step-num">2</span>
+        <span class="step-label">Wallet</span>
+      </div>
+    </div>
+
+    <!-- Step 1: RPC Configuration -->
+    <section id="rpc-section" class="settings-section">
+      <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <div>
+          <h2>RPC Endpoint</h2>
+          <p class="section-desc">Connect to Solana network</p>
+        </div>
+      </div>
+
+      <div class="rpc-options">
+        <label class="radio-card">
+          <input type="radio" name="rpc-choice" value="free" checked>
+          <div class="radio-content">
+            <span class="radio-title">🆓 Free Public RPC</span>
+            <span class="radio-desc">Uses public Solana RPC (rate limited)</span>
+          </div>
+          <span class="checkmark"></span>
+        </label>
+
+        <label class="radio-card">
+          <input type="radio" name="rpc-choice" value="helius">
+          <div class="radio-content">
+            <span class="radio-title">🔥 Helius (Free Tier)</span>
+            <span class="radio-desc">Fast & reliable, get free key at helius.dev</span>
+          </div>
+          <span class="checkmark"></span>
+        </label>
+
+        <label class="radio-card">
+          <input type="radio" name="rpc-choice" value="custom">
+          <div class="radio-content">
+            <span class="radio-title">🔧 Custom RPC</span>
+            <span class="radio-desc">Enter your own endpoint</span>
+          </div>
+          <span class="checkmark"></span>
+        </label>
+      </div>
+
+      <div id="custom-rpc-input" class="custom-input hidden">
+        <div class="form-group">
+          <label for="rpc-url">RPC URL</label>
+          <input type="url" id="rpc-url" placeholder="https://your-rpc-endpoint.com">
+        </div>
+      </div>
+
+      <div id="helius-input" class="custom-input hidden">
+        <div class="form-group">
+          <label for="helius-key">Helius API Key</label>
+          <input type="text" id="helius-key" placeholder="Enter your Helius API key">
+          <a href="https://helius.dev" target="_blank" class="helper-link">Get free key →</a>
+        </div>
+      </div>
+
+      <button id="save-rpc-btn" class="btn btn-primary">
+        Save & Continue
+      </button>
+    </section>
+
+    <!-- Step 2: Wallet Connection -->
+    <section id="wallet-section" class="settings-section hidden">
+      <div class="section-header">
+        <span class="section-icon">💳</span>
+        <div>
+          <h2>Connect Wallet</h2>
+          <p class="section-desc">Required for launching tokens</p>
+        </div>
+      </div>
+
+      <div id="wallet-status" class="wallet-status disconnected">
+        <span class="status-dot"></span>
+        <span class="status-text">Not Connected</span>
+      </div>
+
+      <div class="wallet-options">
+        <button class="wallet-option" data-wallet="phantom">
+          <svg width="24" height="24" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="128" height="128" rx="26" fill="#AB9FF2"/>
+            <path d="M110.584 64.9142H99.142C99.142 41.7651 80.173 23 56.7724 23C33.6612 23 14.8716 41.3057 14.4169 64.0583C13.9504 87.3676 35.8893 107 59.2499 107H63.4374C83.6211 107 103.488 93.5762 110.17 74.1962C111.426 70.6992 111.926 67.1331 110.584 64.9142ZM40.2439 66.2913C40.2439 69.1377 37.9223 71.4454 35.0585 71.4454C32.1947 71.4454 29.8731 69.1377 29.8731 66.2913V58.4451C29.8731 55.5987 32.1947 53.291 35.0585 53.291C37.9223 53.291 40.2439 55.5987 40.2439 58.4451V66.2913ZM59.9171 66.2913C59.9171 69.1377 57.5955 71.4454 54.7317 71.4454C51.8679 71.4454 49.5463 69.1377 49.5463 66.2913V58.4451C49.5463 55.5987 51.8679 53.291 54.7317 53.291C57.5955 53.291 59.9171 55.5987 59.9171 58.4451V66.2913Z" fill="#FFFDF8"/>
+          </svg>
+          <span>Phantom</span>
+        </button>
+        <button class="wallet-option" data-wallet="solflare">
+          <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="32" fill="url(#solflare-gradient)"/>
+            <path d="M32 12L44 24L32 36L20 24L32 12Z" fill="white"/>
+            <path d="M32 28L44 40L32 52L20 40L32 28Z" fill="white" fill-opacity="0.6"/>
+            <defs>
+              <linearGradient id="solflare-gradient" x1="0" y1="0" x2="64" y2="64">
+                <stop stop-color="#FCC00A"/>
+                <stop offset="1" stop-color="#FC7B23"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>Solflare</span>
+        </button>
+        <button class="wallet-option" data-wallet="privatekey">
+          <span class="key-icon">🔑</span>
+          <span>Paste Private Key</span>
+        </button>
+        <button class="wallet-option burner" data-wallet="burner">
+          <span class="burner-icon">🔥</span>
+          <span>Generate Burner</span>
+        </button>
+      </div>
+
+      <div id="privatekey-input" class="custom-input hidden">
+        <div class="form-group">
+          <label for="private-key">Private Key (base58)</label>
+          <input type="password" id="private-key" placeholder="Paste your private key">
+          <small class="helper-text">⚠️ Stored locally, never sent anywhere</small>
+        </div>
+        <button id="import-key-btn" class="btn btn-primary btn-sm">
+          Import Wallet
+        </button>
+      </div>
+
+      <div id="burner-warning" class="warning-box hidden">
+        <strong>⚠️ Burner Wallet</strong>
+        <p>This creates a temporary wallet. Fund it with SOL before launching.</p>
+      </div>
+    </section>
+
+    <!-- Setup Complete State -->
+    <section id="ready-section" class="settings-section hidden">
+      <div class="ready-state">
+        <span class="ready-icon">✅</span>
+        <h2>Ready to Clone!</h2>
+        <p>Visit <a href="https://axiom.trade" target="_blank">axiom.trade</a> and click the Clone button on any token.</p>
+      </div>
+
+      <div class="current-config">
+        <div class="config-item">
+          <span class="config-label">RPC:</span>
+          <span id="current-rpc" class="config-value">-</span>
+        </div>
+        <div class="config-item">
+          <span class="config-label">Wallet:</span>
+          <span id="current-wallet" class="config-value">-</span>
+        </div>
+      </div>
+
+      <!-- Auto-sign Toggle -->
+      <div id="autosign-section" class="autosign-section hidden">
+        <label class="toggle-card">
+          <div class="toggle-content">
+            <span class="toggle-title">⚡ Auto-Sign Mode</span>
+            <span class="toggle-desc">Sign transactions automatically without wallet popup</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="autosign-toggle">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+        <small class="autosign-warning">⚠️ Only works with imported/burner wallets</small>
+      </div>
+
+      <button id="edit-settings-btn" class="btn btn-secondary">
+        Edit Settings
+      </button>
+    </section>
+
+    <!-- Status Messages -->
+    <div id="status-container" class="status-container hidden">
+      <div id="status-message" class="status-message"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Clone tokens from Axiom → Pump.fun</span>
+      <div class="footer-credit">
+        Created by <a href="https://twitter.com/kaelxsol" target="_blank" rel="noopener">@kaelxsol</a>
+        <a href="https://axiom.trade/meme/insertca?chain=sol" target="_blank" rel="noopener" class="token-link">$beta</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

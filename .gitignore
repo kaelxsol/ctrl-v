@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+releases/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Chrome extension artifacts
+*.pem
+*.crx
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Playwright MCP
+.playwright-mcp/
+
+# Release archives (generated)
+*.zip
+*.rar
+
+# Development files (not needed for distribution)
+.github/
+docs/
+scripts/
+CLAUDE.md
+generate-icons.html
+package.json
+package-lock.json
+CHANGELOG.md

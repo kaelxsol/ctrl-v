@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Beta Launch",
+  "version": "0.1.0",
+  "description": "Clone meme tokens from Axiom.trade and launch on Pump.fun with one click",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://axiom.trade/*",
+    "https://pump.fun/*",
+    "https://pumpportal.fun/*",
+    "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://public-api-v2.bags.fm/*",
+    "https://bags.fm/*",
+    "https://gated.chat/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://axiom.trade/*"],
+      "js": ["content.js"],
+      "css": [],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "injected/axiom-inject.js",
+        "injected/panel.js",
+        "injected/panel.css",
+        "vendor/solana-web3.min.js"
+      ],
+      "matches": ["https://axiom.trade/*"]
+    }
+  ]
+}

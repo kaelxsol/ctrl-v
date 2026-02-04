@@ -1,0 +1,700 @@
+/* Beta Launch - Panel Styles */
+/* Matches Axiom.trade's native panel styling */
+
+/* ==================== DOCKED PANEL MODE ==================== */
+/* When panel docks into Axiom's flex container */
+
+.acl-docked-panel {
+  background: var(--background, #0d0d0f);
+  border-right: 1px solid var(--primary-stroke, #2a2a30);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--primary-text, #ffffff);
+}
+
+.acl-docked-panel .acl-docked-header {
+  background: var(--background, #0d0d0f);
+  border-bottom: 1px solid var(--primary-stroke, #2a2a30);
+}
+
+.acl-docked-panel .acl-header-title {
+  color: var(--primary-text, #ffffff);
+  font-weight: 500;
+}
+
+.acl-docked-panel .acl-btn-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--tertiary-text, #666);
+  transition: all 0.15s ease;
+}
+
+.acl-docked-panel .acl-btn-icon:hover {
+  background: var(--primary-stroke, #2a2a30);
+  color: var(--primary-text, #fff);
+}
+
+.acl-docked-panel .acl-btn-icon.close:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: #ff4757;
+}
+
+.acl-docked-panel .acl-body {
+  background: var(--background, #0d0d0f);
+}
+
+/* ==================== FLOATING PANEL MODE ==================== */
+/* Fallback when Axiom container not found */
+
+.acl-floating-panel {
+  position: fixed;
+  z-index: 999999;
+  width: 340px;
+  max-height: 90vh;
+  background: var(--background, #0d0d0f);
+  border: 1px solid var(--primary-stroke, #2a2a30);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--primary-text, #ffffff);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: none;
+}
+
+.acl-floating-panel.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.acl-floating-panel.dragging {
+  transition: none;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(0, 255, 136, 0.3);
+  cursor: grabbing;
+}
+
+.acl-floating-panel.snapping {
+  transition: left 0.2s ease, top 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Floating Header */
+.acl-floating-panel .acl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--background-secondary, #141418) 0%, var(--background, #0d0d0f) 100%);
+  border-bottom: 1px solid var(--primary-stroke, #2a2a30);
+  cursor: grab;
+  user-select: none;
+}
+
+.acl-floating-panel .acl-header:active {
+  cursor: grabbing;
+}
+
+.acl-floating-panel .acl-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.acl-floating-panel .acl-header-title {
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #00ff88 0%, #00ffcc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.acl-floating-panel .acl-header-drag-hint {
+  width: 24px;
+  height: 4px;
+  background: var(--tertiary-text, #3a3a40);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.acl-floating-panel .acl-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.acl-floating-panel .acl-btn-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--tertiary-text, #666);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 14px;
+}
+
+.acl-floating-panel .acl-btn-icon:hover {
+  background: var(--background-secondary, #1a1a1f);
+  border-color: var(--primary-stroke, #2a2a30);
+  color: var(--primary-text, #fff);
+}
+
+.acl-floating-panel .acl-btn-icon.close:hover {
+  background: rgba(255, 71, 87, 0.15);
+  border-color: #ff4757;
+  color: #ff4757;
+}
+
+/* Floating resize handle */
+.acl-floating-panel .acl-resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  opacity: 0.3;
+  transition: opacity 0.15s ease;
+}
+
+.acl-floating-panel .acl-resize-handle:hover {
+  opacity: 0.6;
+}
+
+.acl-floating-panel .acl-resize-handle::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--tertiary-text, #666);
+  border-bottom: 2px solid var(--tertiary-text, #666);
+}
+
+/* Minimize State */
+.acl-floating-panel.minimized {
+  height: auto !important;
+  max-height: none;
+}
+
+.acl-floating-panel.minimized .acl-body {
+  display: none;
+}
+
+/* ==================== SHARED STYLES ==================== */
+/* Used by both docked and floating panels */
+
+/* Panel Body */
+.acl-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Scrollbar - matches Axiom's style */
+.acl-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.acl-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.acl-body::-webkit-scrollbar-thumb {
+  background: var(--primary-stroke, #2a2a30);
+  border-radius: 2px;
+}
+
+.acl-body::-webkit-scrollbar-thumb:hover {
+  background: var(--tertiary-text, #3a3a40);
+}
+
+/* Platform Selector */
+.acl-platform-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.acl-platform-label {
+  font-size: 11px;
+  color: var(--tertiary-text, #a0a0a0);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.acl-platform-options {
+  display: flex;
+  gap: 6px;
+}
+
+.acl-platform-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: var(--background-secondary, #141418);
+  border: 1px solid var(--primary-stroke, #2a2a30);
+  border-radius: 6px;
+  color: var(--secondary-text, #a0a0a0);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.acl-platform-btn:hover {
+  border-color: var(--tertiary-text, #3a3a40);
+  color: var(--primary-text, #fff);
+  background: var(--background-tertiary, #1a1a1f);
+}
+
+.acl-platform-btn.active {
+  border-color: var(--accent, #00ff88);
+  background: rgba(0, 255, 136, 0.08);
+  color: var(--primary-text, #fff);
+}
+
+.acl-platform-btn.active[data-platform="bonk"] {
+  border-color: #f7931a;
+  background: rgba(247, 147, 26, 0.08);
+}
+
+.acl-platform-btn.active[data-platform="bags"] {
+  border-color: #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.acl-platform-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.acl-platform-name {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Bags API Key */
+.acl-bags-key {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.acl-bags-key input {
+  background: var(--background-secondary, #141418);
+}
+
+.acl-hint {
+  font-size: 10px;
+  color: var(--tertiary-text, #666);
+  margin-top: 4px;
+}
+
+/* Wallet Section */
+.acl-wallet-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--background-secondary, #141418);
+  border-radius: 8px;
+  border: 1px solid var(--primary-stroke, #2a2a30);
+}
+
+.acl-wallet-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.acl-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4757;
+  flex-shrink: 0;
+}
+
+.acl-wallet-status.connected .acl-status-dot {
+  background: var(--accent, #00ff88);
+  box-shadow: 0 0 6px var(--accent, #00ff88);
+}
+
+.acl-wallet-options {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.acl-wallet-options.show {
+  display: flex;
+}
+
+.acl-wallet-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--background-tertiary, #1a1a1f);
+  border: 1px solid var(--primary-stroke, #2a2a30);
+  border-radius: 6px;
+  color: var(--primary-text, #fff);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 12px;
+}
+
+.acl-wallet-option:hover {
+  border-color: var(--accent, #00ff88);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.acl-wallet-option img {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+/* Token Preview */
+.acl-token-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--background-secondary, #141418);
+  border-radius: 8px;
+  border: 1px solid var(--primary-stroke, #2a2a30);
+}
+
+.acl-token-image {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--background-tertiary, #1a1a1f);
+  border: 2px solid var(--primary-stroke, #2a2a30);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acl-token-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.acl-token-image .placeholder {
+  font-size: 9px;
+  color: var(--tertiary-text, #666);
+  text-align: center;
+  padding: 4px;
+}
+
+.acl-token-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.acl-token-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--primary-text, #fff);
+}
+
+.acl-token-ticker {
+  font-size: 11px;
+  color: var(--accent, #00ff88);
+  font-weight: 500;
+}
+
+.acl-token-ca {
+  font-size: 10px;
+  color: var(--tertiary-text, #666);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* Form */
+.acl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.acl-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.acl-form-group label {
+  font-size: 11px;
+  color: var(--secondary-text, #a0a0a0);
+  font-weight: 500;
+}
+
+.acl-form-group input,
+.acl-form-group textarea {
+  background: var(--background-tertiary, #1a1a1f);
+  border: 1px solid var(--primary-stroke, #2a2a30);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--primary-text, #fff);
+  font-size: 12px;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.acl-form-group input:focus,
+.acl-form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent, #00ff88);
+}
+
+.acl-form-group input::placeholder,
+.acl-form-group textarea::placeholder {
+  color: var(--tertiary-text, #666);
+}
+
+.acl-form-group textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.acl-form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.acl-form-row .acl-form-group {
+  flex: 1;
+}
+
+/* Collapsible Social Links */
+.acl-collapsible {
+  background: var(--background-secondary, #141418);
+  border-radius: 6px;
+  border: 1px solid var(--primary-stroke, #2a2a30);
+  overflow: hidden;
+}
+
+.acl-collapsible-header {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--secondary-text, #a0a0a0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: color 0.15s ease;
+}
+
+.acl-collapsible-header:hover {
+  color: var(--primary-text, #fff);
+}
+
+.acl-collapsible-header .arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.acl-collapsible.open .acl-collapsible-header .arrow {
+  transform: rotate(180deg);
+}
+
+.acl-collapsible-content {
+  display: none;
+  padding: 0 10px 10px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.acl-collapsible.open .acl-collapsible-content {
+  display: flex;
+}
+
+/* Buttons */
+.acl-btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.acl-btn-primary {
+  background: linear-gradient(135deg, var(--accent, #00ff88) 0%, #00cc6a 100%);
+  color: var(--background, #0d0d0f);
+}
+
+.acl-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+}
+
+.acl-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.acl-btn-secondary {
+  background: var(--background-tertiary, #1a1a1f);
+  color: var(--primary-text, #fff);
+  border: 1px solid var(--primary-stroke, #2a2a30);
+}
+
+.acl-btn-secondary:hover {
+  border-color: var(--accent, #00ff88);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+/* Spinner */
+.acl-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: acl-spin 0.8s linear infinite;
+}
+
+@keyframes acl-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Status Messages */
+.acl-status {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  display: none;
+}
+
+.acl-status.show {
+  display: block;
+}
+
+.acl-status.success {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid var(--accent, #00ff88);
+  color: var(--accent, #00ff88);
+}
+
+.acl-status.error {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid #ff4757;
+  color: #ff4757;
+}
+
+.acl-status.info {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--primary-stroke, #2a2a30);
+  color: var(--secondary-text, #a0a0a0);
+}
+
+/* ==================== TOOLBAR TOGGLE BUTTON ==================== */
+
+#acl-toggle-btn {
+  color: var(--accent, #00ff88) !important;
+}
+
+#acl-toggle-btn i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#acl-toggle-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+#acl-toggle-btn:hover {
+  background: rgba(42, 42, 48, 0.6) !important;
+}
+
+/* Highlight button when panel is visible */
+body:has(#acl-panel.visible) #acl-toggle-btn,
+body:has(.acl-docked-panel:not([style*="display: none"])) #acl-toggle-btn {
+  background: rgba(0, 255, 136, 0.15) !important;
+}
+
+/* ==================== DOCKED RESIZE HANDLE ==================== */
+
+#acl-resize-handle {
+  height: 100%;
+  width: 4px;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+#acl-resize-handle:hover {
+  background: rgba(0, 255, 136, 0.3);
+}
+
+/* ==================== IMAGE DROPZONE ==================== */
+
+.acl-dropzone {
+  border: 2px dashed var(--primary-stroke, #4b5563);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.acl-dropzone:hover {
+  border-color: rgba(0, 255, 136, 0.5);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.acl-dropzone.dragover {
+  border-color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+}
+
+/* ==================== UTILITY CLASSES ==================== */
+/* Scoped to our panel to avoid conflicting with Axiom's Tailwind classes */
+
+#acl-panel .acl-hidden,
+.acl-floating-panel .acl-hidden {
+  display: none !important;
+}
