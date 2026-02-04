@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="banner.png" alt="Beta Launch" width="100%">
+</p>
+
 # Beta Launch 🚀
 
 A Chrome extension that enables one-click cloning of meme tokens from Axiom.trade and launching them on Pump.fun.
