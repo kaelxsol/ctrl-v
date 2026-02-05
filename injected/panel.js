@@ -1885,7 +1885,6 @@
         <!-- Footer Credit -->
         <div class="flex flex-col items-center gap-[4px] pt-[8px] border-t border-white/10 mt-[4px]">
           <span class="text-[9px] text-white/40">Created by <a href="https://twitter.com/kaelxsol" target="_blank" rel="noopener" class="text-white/60 hover:text-green-400 transition-colors">@kaelxsol</a></span>
-          <a href="https://axiom.trade/meme/2rYj8nHynSmubF2hb7j7m5ovm3CGyymoEzKkf5fepump" target="_blank" rel="noopener" class="text-[10px] font-semibold text-green-400 hover:text-green-300 transition-colors">$beta</a>
         </div>
       </div>
     `;

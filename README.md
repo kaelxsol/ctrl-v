@@ -6,7 +6,7 @@
 
 A Chrome extension that enables one-click cloning of meme tokens from Axiom.trade and launching them on Pump.fun.
 
-Created by [@kaelxsol](https://twitter.com/kaelxsol) | [$beta](https://axiom.trade/meme/2rYj8nHynSmubF2hb7j7m5ovm3CGyymoEzKkf5fepump)
+Created by [@kaelxsol](https://twitter.com/kaelxsol)
 
 ## Features
 
