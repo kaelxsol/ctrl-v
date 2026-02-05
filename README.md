@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="banner.png" alt="Beta Launch" width="100%">
+  <img src="banner.png" alt="CTRL + V" width="100%">
 </p>
 
-# Beta Launch 🚀
+# CTRL + V 🚀
 
 A Chrome extension that enables one-click cloning of meme tokens from Axiom.trade and launching them on Pump.fun.
 

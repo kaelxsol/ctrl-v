@@ -1,4 +1,4 @@
-// Beta Launch - Docked Panel
+// CTRL + V - Docked Panel
 // Matches Axiom.trade's native panel docking behavior
 
 (function() {
@@ -449,7 +449,7 @@
       createdOn: 'https://bonk.fun',
       name: metadata.name.substring(0, 31),
       symbol: metadata.ticker.substring(0, 7).toUpperCase(),
-      description: desc.length > 0 ? desc.substring(0, 1000) : `${metadata.name} - launched via Beta Launch`,
+      description: desc.length > 0 ? desc.substring(0, 1000) : `${metadata.name} - launched via CTRL + V`,
       image: imageUri
     };
     
@@ -1683,7 +1683,7 @@
           <span class="contents">
             <i class="ri-draggable text-[14px] text-tertiaryText transition-colors" style="transform: rotate(90deg);"></i>
           </span>
-          <span class="text-[12px] font-medium text-primaryText whitespace-nowrap">Beta Launch</span>
+          <span class="text-[12px] font-medium text-primaryText whitespace-nowrap">CTRL + V</span>
         </div>
         <div class="flex items-center gap-[8px]">
           <button class="acl-btn-icon flex h-[24px] w-[24px] items-center justify-center rounded-[4px] text-tertiaryText hover:bg-white/10 hover:text-primaryText transition-colors" title="Settings">
@@ -1709,7 +1709,7 @@
       <div class="acl-header relative flex h-[44px] min-h-[44px] cursor-move select-none items-center justify-between gap-[16px] border-b border-white/10 px-[12px]" style="background: #0d0d0f;">
         <div class="flex items-center gap-[8px]">
           <i class="ri-draggable text-[14px] text-white/40" style="transform: rotate(90deg);"></i>
-          <span class="text-[12px] font-medium text-white whitespace-nowrap">Beta Launch</span>
+          <span class="text-[12px] font-medium text-white whitespace-nowrap">CTRL + V</span>
         </div>
         <div class="flex items-center gap-[8px]">
           <button class="acl-btn-icon close flex h-[24px] w-[24px] items-center justify-center rounded-[4px] text-white/40 hover:bg-white/10 hover:text-white transition-colors" title="Close">
@@ -3564,7 +3564,7 @@ Respond with JSON:
 
         // Custom tooltip positioned above
         const tooltip = document.createElement('div');
-        tooltip.textContent = 'Beta Launch';
+        tooltip.textContent = 'CTRL + V';
         tooltip.style.cssText = `
           position: absolute;
           bottom: 100%;
@@ -3622,7 +3622,7 @@ Respond with JSON:
 
     const btn = document.createElement('button');
     btn.id = 'acl-toggle-btn';
-    btn.title = 'Beta Launch (Ctrl+Shift+C)';
+    btn.title = 'CTRL + V (Ctrl+Shift+C)';
     btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`;
     btn.style.cssText = `
       position: fixed;

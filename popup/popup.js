@@ -1,4 +1,4 @@
-// Popup script for Beta Launch - Settings & Setup
+// Popup script for CTRL + V - Settings & Setup
 
 (function() {
   'use strict';

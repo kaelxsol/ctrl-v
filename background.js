@@ -1,6 +1,6 @@
-// Background service worker for Beta Launch
+// Background service worker for CTRL + V
 
-console.log('[Beta Launch] Background service worker started');
+console.log('[CTRL + V] Background service worker started');
 
 // Import update checker
 importScripts('utils/updateChecker.js');

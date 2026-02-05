@@ -1,4 +1,4 @@
-// Injected script for Beta Launch
+// Injected script for CTRL + V
 // This script runs in the page context to access page variables
 
 (function() {
