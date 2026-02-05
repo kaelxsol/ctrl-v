@@ -2,7 +2,7 @@
 // Checks GitHub releases for new versions
 
 const UPDATE_CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
-const GITHUB_REPO = 'kaelxsol/betalaunch';
+const GITHUB_REPO = 'kaelxsol/ctrl-v';
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
 /**

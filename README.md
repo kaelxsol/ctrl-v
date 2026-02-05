@@ -32,12 +32,12 @@ Created by [@kaelxsol](https://twitter.com/kaelxsol)
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/kaelxsol/betalaunch.git
+   git clone https://github.com/kaelxsol/ctrl-v.git
    ```
 2. Open Chrome and navigate to `chrome://extensions`
 3. Enable "Developer mode" (toggle in top right)
 4. Click "Load unpacked"
-5. Select the `betalaunch` folder
+5. Select the `ctrl-v` folder
 
 ### From Chrome Web Store
 
