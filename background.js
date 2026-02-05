@@ -1,6 +1,6 @@
-// Background service worker for CTRL + V
+// Background service worker for CTRL-V
 
-console.log('[CTRL + V] Background service worker started');
+console.log('[CTRL-V] Background service worker started');
 
 // Import update checker
 importScripts('utils/updateChecker.js');

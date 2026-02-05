@@ -1,10 +1,10 @@
-// Content script for CTRL + V
+// Content script for CTRL-V
 // Injected into axiom.trade pages
 
 (function() {
   'use strict';
 
-  console.log('[CTRL + V] Content script loaded');
+  console.log('[CTRL-V] Content script loaded');
 
   // Configuration
   const CONFIG = {
@@ -23,14 +23,14 @@
     if (panelInjected) return;
     panelInjected = true;
 
-    console.log('[CTRL + V] Injecting panel...');
+    console.log('[CTRL-V] Injecting panel...');
 
     // Inject CSS
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = chrome.runtime.getURL('injected/panel.css');
     document.head.appendChild(link);
-    console.log('[CTRL + V] CSS injected:', link.href);
+    console.log('[CTRL-V] CSS injected:', link.href);
 
     // Inject JS with extension URLs as data attributes
     // We use data attributes instead of inline scripts to avoid CSP blocking
@@ -39,15 +39,15 @@
     script.dataset.extensionId = chrome.runtime.id;
     script.dataset.solanaWeb3Url = chrome.runtime.getURL('vendor/solana-web3.min.js');
     script.onload = () => {
-      console.log('[CTRL + V] Panel JS loaded successfully');
+      console.log('[CTRL-V] Panel JS loaded successfully');
       // Don't remove the script - we need to read data attributes from it
     };
     script.onerror = (e) => {
-      console.error('[CTRL + V] Panel JS failed to load:', e);
+      console.error('[CTRL-V] Panel JS failed to load:', e);
     };
     document.head.appendChild(script);
 
-    console.log('[CTRL + V] Panel injection initiated');
+    console.log('[CTRL-V] Panel injection initiated');
   }
 
   /**
@@ -62,7 +62,7 @@
    * Handle clone trigger - opens draggable panel
    */
   function handleCloneClick(tokenData) {
-    console.log('[CTRL + V] Clone clicked:', tokenData);
+    console.log('[CTRL-V] Clone clicked:', tokenData);
 
     // Ensure panel is injected
     injectPanel();
@@ -169,7 +169,7 @@
       });
 
     } catch (err) {
-      console.warn('[CTRL + V] DOM extraction error:', err);
+      console.warn('[CTRL-V] DOM extraction error:', err);
     }
 
     return data;
@@ -416,7 +416,7 @@
    * Initialize the content script
    */
   function init() {
-    console.log('[CTRL + V] Initializing...');
+    console.log('[CTRL-V] Initializing...');
 
     // Inject the draggable panel
     injectPanel();

@@ -1,4 +1,4 @@
-// Update checker utility for CTRL + V
+// Update checker utility for CTRL-V
 // Checks GitHub releases for new versions
 
 const UPDATE_CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
@@ -91,7 +91,7 @@ async function showUpdateBadge() {
   try {
     await chrome.action.setBadgeText({ text: '1' });
     await chrome.action.setBadgeBackgroundColor({ color: '#00ff88' });
-    await chrome.action.setTitle({ title: 'CTRL + V - Update Available!' });
+    await chrome.action.setTitle({ title: 'CTRL-V - Update Available!' });
   } catch (e) {
     console.error('[UpdateChecker] Error setting badge:', e);
   }
@@ -103,7 +103,7 @@ async function showUpdateBadge() {
 async function clearUpdateBadge() {
   try {
     await chrome.action.setBadgeText({ text: '' });
-    await chrome.action.setTitle({ title: 'CTRL + V' });
+    await chrome.action.setTitle({ title: 'CTRL-V' });
   } catch (e) {
     console.error('[UpdateChecker] Error clearing badge:', e);
   }
