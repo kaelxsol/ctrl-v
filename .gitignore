@@ -53,3 +53,6 @@ generate-icons.html
 package.json
 package-lock.json
 CHANGELOG.md
+
+# Large media files (hosted externally)
+landing/*.mp4
