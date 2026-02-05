@@ -1,4 +1,4 @@
-// Popup script for CTRL + V - Settings & Setup
+// Popup script for CTRL-V - Settings & Setup
 
 (function() {
   'use strict';

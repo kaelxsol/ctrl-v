@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "CTRL + V",
+  "name": "CTRL-V",
   "version": "0.1.0",
-  "description": "Clone meme tokens from Axiom.trade and launch on Pump.fun with one click",
+  "description": "One-click token cloning. Axiom to Pump.fun, Bonk.fun, Bags.fm.",
   "permissions": [
     "activeTab",
     "storage",
