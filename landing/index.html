@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTRL-V — See it. Clone it. Ship it.</title>
+  <meta name="description" content="One-click token cloning from Axiom.trade. Clone any token's metadata and launch on Pump.fun, Bonk.fun, or Bags.fm instantly.">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ====== RESET ====== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ====== TOKENS ====== */
+    :root {
+      --bg-primary: #0a0a0c;
+      --bg-secondary: #12121a;
+      --bg-tertiary: #1a1a1f;
+      --accent-green: #00ff88;
+      --accent-green-dim: #00cc6a;
+      --accent-cyan: #00ccff;
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0a0;
+      --text-muted: #4a4a5a;
+      --border-color: #2a2a30;
+      --font-mono: 'Geist Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    /* ====== BASE ====== */
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-mono);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Scanline overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+    }
+
+    a { color: var(--accent-green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ====== LAYOUT ====== */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    /* ====== FADE-IN ANIMATION ====== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ====== NAV ====== */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      background: rgba(10, 10, 12, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      max-width: 240px;
+    }
+
+    .nav-center:hover {
+      border-color: var(--accent-green);
+      color: var(--text-secondary);
+    }
+
+    .nav-center .ca-label {
+      color: var(--accent-green);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .nav-center .ca-address {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav-center.empty {
+      border-style: dashed;
+      cursor: default;
+    }
+
+    .nav-center.empty:hover {
+      border-color: var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .copied-toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: var(--accent-green);
+      color: var(--bg-primary);
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 1001;
+    }
+
+    .copied-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .logo .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 20px;
+      background: var(--accent-green);
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .nav-cta {
+      padding: 8px 20px;
+      background: var(--accent-green);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-green-dim);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+      text-decoration: none;
+      color: var(--bg-primary);
+    }
+
+    /* ====== HERO ====== */
+    .hero {
+      padding-top: 140px;
+      padding-bottom: 80px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 10vw, 96px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .green { color: var(--accent-green); }
+
+    .hero .tagline {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    .hero .subtext {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 48px;
+    }
+
+    /* Video placeholder */
+    .video-container {
+      max-width: 720px;
+      margin: 0 auto 48px;
+      aspect-ratio: 16 / 9;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: var(--accent-green);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .hero-cta:hover {
+      background: var(--accent-green-dim);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 255, 136, 0.3);
+      text-decoration: none;
+      color: var(--bg-primary);
+    }
+
+    /* ====== HOW IT WORKS ====== */
+    .how-it-works {
+      border-top: 1px solid var(--border-color);
+    }
+
+    .section-label {
+      font-size: 12px;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 48px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .step {
+      position: relative;
+      padding: 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: border-color 0.2s ease;
+    }
+
+    .step:hover {
+      border-color: var(--accent-green);
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ====== FEATURES ====== */
+    .features {
+      border-top: 1px solid var(--border-color);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      padding: 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent-green);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ====== DOWNLOAD CTA ====== */
+    .download-section {
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .download-section .section-title {
+      margin-bottom: 16px;
+    }
+
+    .download-section .subtext {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 40px;
+    }
+
+    .install-steps {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+      padding: 20px 28px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 40px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .install-steps code {
+      color: var(--accent-green);
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .open-source-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 24px;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border-color);
+    }
+
+    footer .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 13px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-green);
+    }
+
+    .footer-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 768px) {
+      section { padding: 60px 0; }
+
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .hero { padding-top: 120px; }
+    }
+
+    @media (max-width: 480px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .install-steps {
+        width: 100%;
+      }
+
+      .nav-center {
+        max-width: 140px;
+        padding: 4px 10px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="container">
+      <div class="logo">CTRL-V<span class="cursor"></span></div>
+      <div id="ca-display" class="nav-center empty">
+        <span class="ca-label">CA:</span>
+        <span class="ca-address" id="ca-address">TBD</span>
+      </div>
+      <a href="https://github.com/kaelxsol/ctrl-v/releases" class="nav-cta">Download</a>
+    </div>
+  </nav>
+  <div id="copied-toast" class="copied-toast">Copied!</div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="fade-in">
+        <span class="hero-badge">Chrome Extension &middot; Free &middot; Open Source</span>
+      </div>
+      <div class="fade-in">
+        <h1><span class="green">CTRL-V</span></h1>
+        <p class="tagline">See it. Clone it. Ship it.</p>
+        <p class="subtext">One-click token cloning from Axiom.trade. Extract metadata, pick your platform, launch instantly.</p>
+      </div>
+      <div class="fade-in">
+        <div class="video-container">
+          <video autoplay loop muted playsinline>
+            <source src="demo.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="fade-in">
+        <a href="https://github.com/kaelxsol/ctrl-v/releases" class="hero-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Latest
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works">
+    <div class="container">
+      <div class="fade-in">
+        <p class="section-label">How It Works</p>
+        <h2 class="section-title">Three steps. That's it.</h2>
+      </div>
+      <div class="steps">
+        <div class="step fade-in">
+          <div class="step-number">1</div>
+          <h3>Browse Axiom</h3>
+          <p>Find any token on axiom.trade. Ctrl+Click to clone, or Alt+Click for an AI-generated opposite.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-number">2</div>
+          <h3>Metadata Extracted</h3>
+          <p>Name, ticker, description, image, and social links are pulled automatically. Edit anything before launch.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-number">3</div>
+          <h3>Pick & Launch</h3>
+          <p>Choose Pump.fun, Bonk.fun, or Bags.fm. Connect your wallet. One click to deploy on-chain.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="container">
+      <div class="fade-in">
+        <p class="section-label">Features</p>
+        <h2 class="section-title">Built for speed.</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&UpperRightArrow;</span>
+          <h3>One-Click Cloning</h3>
+          <p>Ctrl+Click any token on Axiom. Metadata fills in instantly, ready to launch.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#9878;</span>
+          <h3>Multi-Platform</h3>
+          <p>Launch on Pump.fun, Bonk.fun, or Bags.fm. Switch platforms with a single click.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#128274;</span>
+          <h3>Wallet Support</h3>
+          <p>Connect Phantom, Solflare, or generate a burner wallet. Your keys, your control.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#9889;</span>
+          <h3>Jito Bundles</h3>
+          <p>Atomic multi-wallet launches via Jito. Create and buy in the same block.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#10022;</span>
+          <h3>AI Opposites</h3>
+          <p>Alt+Click generates an AI-powered "opposite" token concept. Flip any narrative instantly.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&lt;/&gt;</span>
+          <h3>Open Source</h3>
+          <p>Fully transparent. No hidden fees, no token, no tracking. Inspect every line of code.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD CTA -->
+  <section class="download-section">
+    <div class="container">
+      <div class="fade-in">
+        <p class="section-label">Get Started</p>
+        <h2 class="section-title">Install in 30 seconds.</h2>
+        <p class="subtext">Download the extension, load it into Chrome, and you're ready to clone.</p>
+      </div>
+      <div class="install-steps fade-in">
+        <span>1. Download the latest <code>.zip</code> from GitHub Releases</span>
+        <span>2. Go to <code>chrome://extensions</code> &rarr; Enable Developer Mode</span>
+        <span>3. Click <code>Load unpacked</code> &rarr; Select the extracted folder</span>
+        <span>4. Visit <code>axiom.trade</code> &rarr; Ctrl+Click any token</span>
+      </div>
+      <div class="fade-in">
+        <a href="https://github.com/kaelxsol/ctrl-v/releases" class="hero-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Latest
+        </a>
+        <p class="open-source-note">Open source. Free forever. No token.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/kaelxsol/ctrl-v">GitHub</a>
+        <a href="https://x.com/ctrlvlaunch">@ctrlvlaunch</a>
+      </div>
+      <p class="footer-tagline">See it. Clone it. Ship it.</p>
+    </div>
+  </footer>
+
+  <!-- SCROLL ANIMATIONS + CA COPY -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
+
+    // CA display — set address here when token launches
+    // Replace 'TBD' with the actual contract address
+    const TOKEN_CA = '';
+
+    function initCA() {
+      const display = document.getElementById('ca-display');
+      const addressEl = document.getElementById('ca-address');
+      const toast = document.getElementById('copied-toast');
+
+      if (!TOKEN_CA) return;
+
+      addressEl.textContent = TOKEN_CA;
+      display.classList.remove('empty');
+
+      display.addEventListener('click', () => {
+        navigator.clipboard.writeText(TOKEN_CA).then(() => {
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 1500);
+        });
+      });
+    }
+
+    initCA();
+  </script>
+
+</body>
+</html>
